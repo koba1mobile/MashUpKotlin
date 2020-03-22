@@ -3,15 +3,22 @@ package com.example.gitsearch.search
 import android.app.ActionBar
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
+import com.example.gitsearch.search.api.GitSearchManager
+import com.example.gitsearch.search.data.GitSearchResponse
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SearchFragment : Fragment() {
     var recyclerViewGItInfo: RecyclerView? = null
+    var searchManager: GitSearchManager? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,10 +39,27 @@ class SearchFragment : Fragment() {
         // toolbar에 back 버튼 생성
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setHasOptionsMenu(true)
+
+        searchManager = GitSearchManager()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
+
+        val searchView: MenuItem = menu.findItem(R.id.search_view)
+
+        (searchView.actionView as? SearchView)?.setOnQueryTextListener(searchTextListener)
+    }
+
+    val searchTextListener = object : SearchView.OnQueryTextListener{
+        override fun onQueryTextSubmit(query: String?): Boolean {
+            requestSearch(query)
+            return true
+        }
+
+        override fun onQueryTextChange(newText: String?): Boolean {
+            return false
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -46,5 +70,24 @@ class SearchFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item);
         }
+    }
+
+    fun requestSearch(query: String?){
+        val searchCall: Call<GitSearchResponse>
+
+        searchCall = searchManager?.requestGitRepositories(query ?: "") ?: return
+        searchCall.enqueue(object : Callback<GitSearchResponse> {
+            override fun onFailure(call: Call<GitSearchResponse>, t: Throwable) {
+                println(t.message)
+            }
+
+            override fun onResponse(
+                call: Call<GitSearchResponse>,
+                response: Response<GitSearchResponse>
+            ) {
+                println(response.body()?.total_count)
+            }
+        })
+
     }
 }
