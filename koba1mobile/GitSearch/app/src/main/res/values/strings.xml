@@ -11,4 +11,8 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
     <string name="txt_search">Search...</string>
+    <string name="user_info_star_num">%d stars</string>
+    <string name="user_info_ex_description">Description</string>
+    <string name="user_info_ex_Language">Language</string>
+    <string name="user_info_ex_update">Last Update</string>
 </resources>

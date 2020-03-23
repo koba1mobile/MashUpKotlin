@@ -13,6 +13,10 @@
         <action
             android:id="@+id/action_FirstFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
+
+        <action
+            android:id="@+id/action_FirstFragment_to_UserInfoFragment"
+            app:destination="@id/UserInfoFragment" />
     </fragment>
 
     <fragment
@@ -23,5 +27,23 @@
         <action
             android:id="@+id/action_SearchFragment_to_FirstFragment"
             app:destination="@id/FirstFragment" />
+
+        <action
+            android:id="@+id/action_SearchFragment_to_UserInfoFragment"
+            app:destination="@id/UserInfoFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/UserInfoFragment"
+        android:name="com.example.gitsearch.user.UserInfoFragment"
+        tools:layout="@layout/fragment_user_info">
+
+        <action
+            android:id="@+id/action_UserInfoFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
+
+        <action
+            android:id="@+id/action_UserInfoFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
     </fragment>
 </navigation>

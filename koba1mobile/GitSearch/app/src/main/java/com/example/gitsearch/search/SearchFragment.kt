@@ -9,14 +9,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
+import com.example.gitsearch.common.list.ItemClickListener
+import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.search.api.GitSearchManager
+import com.example.gitsearch.search.data.GitRepo
 import com.example.gitsearch.search.data.GitSearchResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SearchFragment : Fragment() {
-    lateinit var recyclerViewGItInfo: RecyclerView
+class SearchFragment : Fragment(), ItemClickListener {
+    lateinit var recyclerViewGitInfo: RecyclerView
     lateinit var searchManager: GitSearchManager
     lateinit var adapter: GitRepoAdapter
 
@@ -32,8 +35,8 @@ class SearchFragment : Fragment() {
     }
 
     fun initView(root: View){
-        recyclerViewGItInfo = root.findViewById(R.id.recycler_view_git_info)
-        recyclerViewGItInfo.layoutManager = LinearLayoutManager(context)
+        recyclerViewGitInfo = root.findViewById(R.id.recycler_view_git_info)
+        recyclerViewGitInfo.layoutManager = LinearLayoutManager(context)
     }
 
     fun init(){
@@ -42,8 +45,8 @@ class SearchFragment : Fragment() {
         setHasOptionsMenu(true)
 
         searchManager = GitSearchManager()
-        adapter = GitRepoAdapter(context!!)
-        recyclerViewGItInfo.adapter = adapter
+        adapter = GitRepoAdapter(context!!, this)
+        recyclerViewGitInfo.adapter = adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -78,7 +81,7 @@ class SearchFragment : Fragment() {
     fun requestSearch(query: String?){
         val searchCall: Call<GitSearchResponse>
 
-        searchCall = searchManager.requestGitRepositories(query ?: "") ?: return
+        searchCall = searchManager.requestGitRepositories(query ?: "")
         searchCall.enqueue(object : Callback<GitSearchResponse> {
             override fun onFailure(call: Call<GitSearchResponse>, t: Throwable) {
                 println(t.message)
@@ -94,5 +97,12 @@ class SearchFragment : Fragment() {
             }
         })
 
+    }
+
+    override fun onItemClick(v: View, position: Int) {
+        var bundle = Bundle()
+        bundle.putSerializable(Constants().key_git_repo_data, (adapter.data?.get(position) as GitRepo))
+
+        findNavController().navigate(R.id.action_SearchFragment_to_UserInfoFragment, bundle)
     }
 }
