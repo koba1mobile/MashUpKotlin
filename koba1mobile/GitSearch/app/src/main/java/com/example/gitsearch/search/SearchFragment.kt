@@ -1,6 +1,5 @@
 package com.example.gitsearch.search
 
-import android.app.ActionBar
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
@@ -12,7 +11,6 @@ import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.search.api.GitSearchManager
 import com.example.gitsearch.search.data.GitSearchResponse
-import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
