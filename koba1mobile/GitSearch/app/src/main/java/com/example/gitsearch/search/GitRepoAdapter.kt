@@ -1,0 +1,61 @@
+package com.example.gitsearch.search
+
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.example.gitsearch.R
+import com.example.gitsearch.search.data.GitRepo
+
+class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    var context: Context
+    var data: List<GitRepo>?
+
+    constructor(context: Context){
+        this.context = context
+        data = ArrayList()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return GitRepoViewHolder(LayoutInflater.from(context).inflate(R.layout.holder_git_repo, parent, false))
+    }
+
+    override fun getItemCount(): Int {
+        return data?.size ?: 0
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        (holder as GitRepoViewHolder).bind(data!!.get(position))
+    }
+
+    inner class GitRepoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var context: Context
+        lateinit var IvAvatar: ImageView
+        lateinit var TvName: TextView
+        lateinit var TvLanauage: TextView
+
+        init {
+            initView(itemView)
+            context = itemView.context
+        }
+
+        fun initView(view: View){
+            IvAvatar = view.findViewById(R.id.iv_avatar)
+            TvName = view.findViewById(R.id.tv_full_name)
+            TvLanauage = view.findViewById(R.id.tv_language)
+        }
+
+        fun bind(data: GitRepo){
+            Glide.with(context)
+                .load(data.user.thumbnail_url)
+                .into(IvAvatar)
+
+            TvName.text = data.full_name
+            TvLanauage.text = data.language ?: ""
+        }
+    }
+}

@@ -6,6 +6,7 @@ import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
@@ -17,8 +18,9 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class SearchFragment : Fragment() {
-    var recyclerViewGItInfo: RecyclerView? = null
-    var searchManager: GitSearchManager? = null
+    lateinit var recyclerViewGItInfo: RecyclerView
+    lateinit var searchManager: GitSearchManager
+    lateinit var adapter: GitRepoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,6 +35,7 @@ class SearchFragment : Fragment() {
 
     fun initView(root: View){
         recyclerViewGItInfo = root.findViewById(R.id.recycler_view_git_info)
+        recyclerViewGItInfo.layoutManager = LinearLayoutManager(context)
     }
 
     fun init(){
@@ -41,6 +44,8 @@ class SearchFragment : Fragment() {
         setHasOptionsMenu(true)
 
         searchManager = GitSearchManager()
+        adapter = GitRepoAdapter(context!!)
+        recyclerViewGItInfo.adapter = adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -48,7 +53,7 @@ class SearchFragment : Fragment() {
 
         val searchView: MenuItem = menu.findItem(R.id.search_view)
 
-        (searchView.actionView as? SearchView)?.setOnQueryTextListener(searchTextListener)
+        (searchView.actionView as SearchView).setOnQueryTextListener(searchTextListener)
     }
 
     val searchTextListener = object : SearchView.OnQueryTextListener{
@@ -75,7 +80,7 @@ class SearchFragment : Fragment() {
     fun requestSearch(query: String?){
         val searchCall: Call<GitSearchResponse>
 
-        searchCall = searchManager?.requestGitRepositories(query ?: "") ?: return
+        searchCall = searchManager.requestGitRepositories(query ?: "") ?: return
         searchCall.enqueue(object : Callback<GitSearchResponse> {
             override fun onFailure(call: Call<GitSearchResponse>, t: Throwable) {
                 println(t.message)
@@ -85,6 +90,8 @@ class SearchFragment : Fragment() {
                 call: Call<GitSearchResponse>,
                 response: Response<GitSearchResponse>
             ) {
+                adapter.data = response.body()?.items
+                adapter.notifyDataSetChanged()
                 println(response.body()?.total_count)
             }
         })
