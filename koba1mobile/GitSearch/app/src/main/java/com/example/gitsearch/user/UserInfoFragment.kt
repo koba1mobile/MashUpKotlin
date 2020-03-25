@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.constant.Constants
-import com.example.gitsearch.search.data.GitRepo
+import com.example.gitsearch.data.GitRepo
 
 class UserInfoFragment: Fragment() {
     lateinit var ivAvatar: ImageView
@@ -76,7 +76,7 @@ class UserInfoFragment: Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             android.R.id.home -> {
-                findNavController().navigate(R.id.action_UserInfoFragment_to_SearchFragment)
+                activity?.onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item);

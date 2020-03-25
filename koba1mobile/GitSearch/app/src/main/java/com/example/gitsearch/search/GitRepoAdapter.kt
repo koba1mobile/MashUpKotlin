@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.gitsearch.R
 import com.example.gitsearch.common.list.ItemClickListener
-import com.example.gitsearch.search.data.GitRepo
+import com.example.gitsearch.data.GitRepo
 
 class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
     var context: Context
@@ -32,7 +32,7 @@ class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as GitRepoViewHolder).bind(data!!.get(position))
+        (holder as GitRepoViewHolder).bind(data!![position])
     }
 
 
@@ -49,7 +49,7 @@ class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         fun initView(view: View){
             view.setOnClickListener{
-                listener.onItemClick(view, adapterPosition)
+                listener.onItemClick(view, this@GitRepoAdapter.data!![adapterPosition])
             }
             IvAvatar = view.findViewById(R.id.iv_avatar)
             TvName = view.findViewById(R.id.tv_full_name)

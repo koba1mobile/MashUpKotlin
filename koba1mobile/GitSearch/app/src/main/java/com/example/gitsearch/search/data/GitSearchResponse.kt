@@ -1,6 +1,6 @@
 package com.example.gitsearch.search.data
 
-import com.google.gson.annotations.SerializedName
+import com.example.gitsearch.data.GitRepo
 
 class GitSearchResponse (
     val total_count: Int,
