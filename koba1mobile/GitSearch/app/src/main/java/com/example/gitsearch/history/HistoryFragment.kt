@@ -3,10 +3,10 @@ package com.example.gitsearch.history
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.fragment.app.Fragment
-import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gitsearch.MainActivity
@@ -16,9 +16,7 @@ import com.example.gitsearch.common.list.ItemData
 import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.data.GitRepo
 import com.example.gitsearch.db.DatabaseManager
-import com.example.gitsearch.db.GitRepoDao
 import com.example.gitsearch.search.GitRepoAdapter
-import com.example.gitsearch.search.api.GitSearchManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 /**
@@ -35,9 +33,7 @@ class HistoryFragment : Fragment(), ItemClickListener{
     ): View? {
         // Inflate the layout for this fragment
         val view: View = inflater.inflate(R.layout.fragment_history, container, false);
-
         initView(view)
-
         init()
         return view
     }
@@ -46,7 +42,35 @@ class HistoryFragment : Fragment(), ItemClickListener{
         tvHitoryDescription = root.findViewById(R.id.tv_history_description)
         recyclerViewGitInfo = root.findViewById(R.id.rv_git_repo_history)
         recyclerViewGitInfo.layoutManager = LinearLayoutManager(context)
+
+        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerViewGitInfo)
     }
+
+    var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback =
+        object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val list = adapter.data
+                val data: GitRepo = list!![viewHolder.adapterPosition]
+
+                DatabaseManager().getGitRepoDao(context!!).delete(data)
+                (list as ArrayList).removeAt(position)
+                adapter.notifyItemRemoved(position)
+
+                tvHitoryDescription.visibility = if(list.isEmpty()) View.VISIBLE else View.GONE
+                recyclerViewGitInfo.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
+
+            }
+        }
 
     fun init(){
         // back 버튼 제거

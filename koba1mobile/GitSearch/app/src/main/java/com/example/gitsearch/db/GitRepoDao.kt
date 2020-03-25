@@ -12,6 +12,6 @@ interface GitRepoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertRepos(repo: GitRepo)
 
-    @Query("DELETE FROM GitRepo")
-    fun delete()
+    @Delete
+    fun delete(repo: GitRepo)
 }

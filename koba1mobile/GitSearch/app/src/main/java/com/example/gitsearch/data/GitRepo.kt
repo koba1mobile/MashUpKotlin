@@ -24,7 +24,7 @@ data class GitRepo (
 
     val stargazers_count: Int,
 
-    val description: String,
+    val description: String?,
 
     val updated_at: String
 ): Serializable, ItemData
