@@ -10,7 +10,7 @@ class GitSearchManager {
 
     fun requestGitRepositories(query: String): Call<GitSearchResponse> {
         val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl(ApiUrl.GitHubUrl().baseUrl)
+            .baseUrl(ApiUrl.GitHubUrl.baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

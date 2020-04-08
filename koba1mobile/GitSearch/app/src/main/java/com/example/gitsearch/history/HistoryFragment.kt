@@ -95,7 +95,7 @@ class HistoryFragment : Fragment(), ItemClickListener{
         val data = item as GitRepo
 
         val bundle = Bundle()
-        bundle.putSerializable(Constants().key_git_repo_data, data)
+        bundle.putSerializable(Constants.key_git_repo_data, data)
 
         findNavController().navigate(R.id.action_HistoryFragment_to_UserInfoFragment, bundle)
     }

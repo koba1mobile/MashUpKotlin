@@ -110,7 +110,7 @@ class SearchFragment : Fragment(), ItemClickListener {
     override fun onItemClick(v: View, item: ItemData) {
         val data = item as GitRepo
         var bundle = Bundle()
-        bundle.putSerializable(Constants().key_git_repo_data, data)
+        bundle.putSerializable(Constants.key_git_repo_data, data)
 
         findNavController().navigate(R.id.action_SearchFragment_to_UserInfoFragment, bundle)
 

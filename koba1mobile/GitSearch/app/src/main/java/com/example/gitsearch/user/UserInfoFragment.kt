@@ -31,7 +31,7 @@ class UserInfoFragment: Fragment() {
     }
 
     fun init(){
-        data = (arguments?.getSerializable(Constants().key_git_repo_data) as GitRepo)
+        data = (arguments?.getSerializable(Constants.key_git_repo_data) as GitRepo)
 
         // toolbar에 back 버튼 생성
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
