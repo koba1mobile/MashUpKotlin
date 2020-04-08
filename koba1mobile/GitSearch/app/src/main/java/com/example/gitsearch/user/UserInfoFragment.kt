@@ -5,23 +5,15 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.data.GitRepo
+import kotlinx.android.synthetic.main.fragment_user_info.*
 
 class UserInfoFragment: Fragment() {
-    lateinit var ivAvatar: ImageView
-    lateinit var tvFullName: TextView
-    lateinit var tvStarNum: TextView
-    lateinit var tvDescription: TextView
-    lateinit var tvLanguage: TextView
-    lateinit var tvUpdate: TextView
     lateinit var data: GitRepo
 
     override fun onCreateView(
@@ -29,26 +21,12 @@ class UserInfoFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view: View = inflater.inflate(R.layout.fragment_user_info, null)
-
-        initView(view)
-
-        init()
-
-        return view
-    }
-    fun initView(root: View){
-        ivAvatar = root.findViewById(R.id.iv_avatar)
-        tvFullName = root.findViewById(R.id.tv_full_name)
-        tvStarNum = root.findViewById(R.id.tv_star_num)
-        tvDescription = root.findViewById(R.id.tv_description)
-        tvLanguage = root.findViewById(R.id.tv_language)
-        tvUpdate = root.findViewById(R.id.tv_update)
+        return inflater.inflate(R.layout.fragment_user_info, null)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        init()
         bind()
     }
 
@@ -59,17 +37,18 @@ class UserInfoFragment: Fragment() {
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setHasOptionsMenu(true)
     }
+
     fun bind(){
         Glide.with(context!!)
             .load(data.user.thumbnail_url)
-            .into(ivAvatar)
+            .into(iv_avatar)
 
-        tvFullName.text = data.full_name
-        tvStarNum.text = getString(R.string.user_info_star_num, data.stargazers_count)
-        tvDescription.text = data.description
-        tvLanguage.text = data.language
+        tv_full_name.text = data.full_name
+        tv_star_num.text = getString(R.string.user_info_star_num, data.stargazers_count)
+        tv_description.text = data.description
+        tv_language.text = data.language
         if(data.updated_at.length > 9){
-            tvUpdate.text = data.updated_at.substring(0..9)
+            tv_update.text = data.updated_at.substring(0..9)
         }
     }
 

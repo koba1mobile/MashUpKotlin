@@ -14,11 +14,9 @@ class GitSearchManager {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val service = retrofit.create(GitHubService::class.java)
+        val service: GitHubService = retrofit.create(GitHubService::class.java)
 
-        val repos = service.listRepos(query)
-
-        return repos
+        return service.listRepos(query)
     }
 
 

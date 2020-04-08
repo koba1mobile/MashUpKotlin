@@ -1,9 +1,7 @@
 package com.example.gitsearch.history
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,36 +16,52 @@ import com.example.gitsearch.data.GitRepo
 import com.example.gitsearch.db.DatabaseManager
 import com.example.gitsearch.search.GitRepoAdapter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.fragment_history.*
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class HistoryFragment : Fragment(), ItemClickListener{
-    lateinit var tvHitoryDescription: TextView
-    lateinit var recyclerViewGitInfo: RecyclerView
     lateinit var adapter: GitRepoAdapter
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        val view: View = inflater.inflate(R.layout.fragment_history, container, false);
-        initView(view)
-        init()
-        return view
+        return inflater.inflate(R.layout.fragment_history, container, false)
     }
 
-    fun initView(root: View){
-        tvHitoryDescription = root.findViewById(R.id.tv_history_description)
-        recyclerViewGitInfo = root.findViewById(R.id.rv_git_repo_history)
-        recyclerViewGitInfo.layoutManager = LinearLayoutManager(context)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init()
+    }
+
+
+    private fun init(){
+        rv_git_repo_history.layoutManager = LinearLayoutManager(context)
 
         val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(recyclerViewGitInfo)
+        itemTouchHelper.attachToRecyclerView(rv_git_repo_history)
+
+        // back 버튼 제거
+        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+
+        val list: List<GitRepo> = DatabaseManager().getGitRepoDao(context!!).getAll()
+
+        tv_history_description.visibility = if(list.isEmpty()) View.VISIBLE else View.GONE
+        rv_git_repo_history.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
+
+        adapter = GitRepoAdapter(context!!, this)
+        rv_git_repo_history.adapter = adapter
+        adapter.data = list
+        adapter.notifyDataSetChanged()
+
+        floatingActionButton_to_search.setOnClickListener {
+            findNavController().navigate(R.id.action_HistoryFragment_to_SearchFragment)
+        }
     }
 
-    var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback =
+    private var simpleItemTouchCallback: ItemTouchHelper.SimpleCallback =
         object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -66,35 +80,11 @@ class HistoryFragment : Fragment(), ItemClickListener{
                 (list as ArrayList).removeAt(position)
                 adapter.notifyItemRemoved(position)
 
-                tvHitoryDescription.visibility = if(list.isEmpty()) View.VISIBLE else View.GONE
-                recyclerViewGitInfo.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
+                tv_history_description.visibility = if(list.isEmpty()) View.VISIBLE else View.GONE
+                rv_git_repo_history.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
 
             }
         }
-
-    fun init(){
-        // back 버튼 제거
-        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
-
-        val list: List<GitRepo> = DatabaseManager().getGitRepoDao(context!!).getAll()
-
-        tvHitoryDescription.visibility = if(list.isEmpty()) View.VISIBLE else View.GONE
-        recyclerViewGitInfo.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
-        adapter = GitRepoAdapter(context!!, this)
-        recyclerViewGitInfo.adapter = adapter
-
-        adapter.data = list
-        adapter.notifyDataSetChanged()
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        view.findViewById<FloatingActionButton>(R.id.floatingActionButton_to_search).setOnClickListener {
-            findNavController().navigate(R.id.action_HistoryFragment_to_SearchFragment)
-        }
-    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_main, menu)

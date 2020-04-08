@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.common.list.ItemClickListener
@@ -17,15 +16,14 @@ import com.example.gitsearch.search.api.GitSearchManager
 import com.example.gitsearch.data.GitRepo
 import com.example.gitsearch.db.DatabaseManager
 import com.example.gitsearch.db.GitRepoDao
-import com.example.gitsearch.db.GitRepoDatabase
 import com.example.gitsearch.search.data.GitSearchResponse
+import kotlinx.android.synthetic.main.fragment_search.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class SearchFragment : Fragment(), ItemClickListener {
     lateinit var searchManager: GitSearchManager
-    lateinit var recyclerViewGitInfo: RecyclerView
     lateinit var adapter: GitRepoAdapter
 
     override fun onCreateView(
@@ -33,15 +31,12 @@ class SearchFragment : Fragment(), ItemClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view: View = inflater.inflate(R.layout.fragment_search, null)
-        initView(view)
-        init()
-        return view
+        return inflater.inflate(R.layout.fragment_search, null)
     }
 
-    fun initView(root: View){
-        recyclerViewGitInfo = root.findViewById(R.id.recycler_view_git_info)
-        recyclerViewGitInfo.layoutManager = LinearLayoutManager(context)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        init()
     }
 
     fun init(){
@@ -49,9 +44,11 @@ class SearchFragment : Fragment(), ItemClickListener {
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
         setHasOptionsMenu(true)
 
+
         searchManager = GitSearchManager()
         adapter = GitRepoAdapter(context!!, this)
-        recyclerViewGitInfo.adapter = adapter
+        rv_git_info.layoutManager = LinearLayoutManager(context)
+        rv_git_info.adapter = adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

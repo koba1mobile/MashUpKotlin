@@ -4,23 +4,19 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.gitsearch.R
 import com.example.gitsearch.common.list.ItemClickListener
 import com.example.gitsearch.data.GitRepo
+import kotlinx.android.synthetic.main.holder_git_repo.view.*
 
-class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    var context: Context
+class GitRepoAdapter(var context: Context, var itemClickListener: ItemClickListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var data: List<GitRepo>?
-    var itemClickListener: ItemClickListener
 
-    constructor(context: Context, itemClickListener: ItemClickListener){
-        this.context = context
+    init {
         data = ArrayList()
-        this.itemClickListener = itemClickListener
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -38,31 +34,27 @@ class GitRepoAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     inner class GitRepoViewHolder(itemView: View, val listener: ItemClickListener) : RecyclerView.ViewHolder(itemView) {
         var context: Context
-        lateinit var IvAvatar: ImageView
-        lateinit var TvName: TextView
-        lateinit var TvLanauage: TextView
 
         init {
             initView(itemView)
             context = itemView.context
         }
 
-        fun initView(view: View){
+        private fun initView(view: View){
             view.setOnClickListener{
                 listener.onItemClick(view, this@GitRepoAdapter.data!![adapterPosition])
             }
-            IvAvatar = view.findViewById(R.id.iv_avatar)
-            TvName = view.findViewById(R.id.tv_full_name)
-            TvLanauage = view.findViewById(R.id.tv_language)
         }
 
         fun bind(data: GitRepo){
-            Glide.with(context)
-                .load(data.user.thumbnail_url)
-                .into(IvAvatar)
+            with(itemView){
+                Glide.with(context)
+                    .load(data.user.thumbnail_url)
+                    .into(iv_avatar)
 
-            TvName.text = data.full_name
-            TvLanauage.text = data.language ?: ""
+                tv_full_name.text = data.full_name
+                tv_language.text = data.language ?: ""
+            }
         }
     }
 }
