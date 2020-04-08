@@ -40,8 +40,9 @@ class HistoryFragment : Fragment(), ItemClickListener{
     private fun init(){
         rv_git_repo_history.layoutManager = LinearLayoutManager(context)
 
-        val itemTouchHelper = ItemTouchHelper(simpleItemTouchCallback)
-        itemTouchHelper.attachToRecyclerView(rv_git_repo_history)
+        ItemTouchHelper(simpleItemTouchCallback).apply {
+            attachToRecyclerView(rv_git_repo_history)
+        }
 
         // back 버튼 제거
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
@@ -52,9 +53,11 @@ class HistoryFragment : Fragment(), ItemClickListener{
         rv_git_repo_history.visibility = if(list.isEmpty()) View.GONE else View.VISIBLE
 
         adapter = GitRepoAdapter(context!!, this)
-        rv_git_repo_history.adapter = adapter
-        adapter.data = list
-        adapter.notifyDataSetChanged()
+        with(adapter){
+            rv_git_repo_history.adapter = this@HistoryFragment.adapter
+            data = list
+            notifyDataSetChanged()
+        }
 
         floatingActionButton_to_search.setOnClickListener {
             findNavController().navigate(R.id.action_HistoryFragment_to_SearchFragment)
@@ -92,11 +95,8 @@ class HistoryFragment : Fragment(), ItemClickListener{
 
 
     override fun onItemClick(v: View, item: ItemData) {
-        val data = item as GitRepo
-
-        val bundle = Bundle()
-        bundle.putSerializable(Constants.key_git_repo_data, data)
-
-        findNavController().navigate(R.id.action_HistoryFragment_to_UserInfoFragment, bundle)
+        findNavController().navigate(R.id.action_HistoryFragment_to_UserInfoFragment, Bundle().apply {
+            putSerializable(Constants.key_git_repo_data, item as GitRepo)
+        })
     }
 }

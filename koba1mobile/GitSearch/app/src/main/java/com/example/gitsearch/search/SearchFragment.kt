@@ -6,7 +6,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.common.list.ItemClickListener
@@ -16,7 +15,6 @@ import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.search.api.GitSearchManager
 import com.example.gitsearch.data.GitRepo
 import com.example.gitsearch.db.DatabaseManager
-import com.example.gitsearch.db.GitRepoDao
 import com.example.gitsearch.search.data.GitSearchResponse
 import kotlinx.android.synthetic.main.fragment_search.*
 import retrofit2.Call
@@ -48,21 +46,25 @@ class SearchFragment : Fragment(), ItemClickListener {
 
         searchManager = GitSearchManager()
         adapter = GitRepoAdapter(context!!, this)
-        rv_git_info.layoutManager = LinearLayoutManager(context)
-        rv_git_info.adapter = adapter
+
+        rv_git_info.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = this@SearchFragment.adapter
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
 
-        val searchItem: MenuItem = menu.findItem(R.id.search_view)
-        searchItem.expandActionView()
+        val searchItem: MenuItem = menu.findItem(R.id.search_view).apply {
+            expandActionView()
+        }
 
-        val searchView: SearchView = searchItem.actionView as SearchView
-        searchView.setOnQueryTextListener(searchTextListener)
-        searchView.requestFocus()
-
-        Utils.showKeyboard(context, searchView)
+        with(searchItem.actionView as SearchView){
+            setOnQueryTextListener(searchTextListener)
+            requestFocus()
+            Utils.showKeyboard(context, this)
+        }
     }
 
     val searchTextListener = object : SearchView.OnQueryTextListener{
@@ -87,9 +89,8 @@ class SearchFragment : Fragment(), ItemClickListener {
     }
 
     fun requestSearch(query: String?){
-        val searchCall: Call<GitSearchResponse>
 
-        searchCall = searchManager.requestGitRepositories(query ?: "")
+        val searchCall: Call<GitSearchResponse> = searchManager.requestGitRepositories(query ?: "")
         searchCall.enqueue(object : Callback<GitSearchResponse> {
             override fun onFailure(call: Call<GitSearchResponse>, t: Throwable) {
                 println(t.message)
@@ -99,8 +100,10 @@ class SearchFragment : Fragment(), ItemClickListener {
                 call: Call<GitSearchResponse>,
                 response: Response<GitSearchResponse>
             ) {
-                adapter.data = response.body()?.items
-                adapter.notifyDataSetChanged()
+                with(adapter){
+                    data = response.body()?.items
+                    notifyDataSetChanged()
+                }
                 println(response.body()?.total_count)
             }
         })
@@ -108,13 +111,15 @@ class SearchFragment : Fragment(), ItemClickListener {
     }
 
     override fun onItemClick(v: View, item: ItemData) {
-        val data = item as GitRepo
-        var bundle = Bundle()
-        bundle.putSerializable(Constants.key_git_repo_data, data)
+        val data: GitRepo = item as GitRepo
+        val bundle: Bundle = Bundle().apply {
+            putSerializable(Constants.key_git_repo_data, data)
+        }
 
         findNavController().navigate(R.id.action_SearchFragment_to_UserInfoFragment, bundle)
 
-        val gitRepoDao: GitRepoDao = DatabaseManager().getGitRepoDao(context!!)
-        gitRepoDao.insertRepos(data)
+        DatabaseManager().getGitRepoDao(context!!).apply {
+            insertRepos(data)
+        }
     }
 }

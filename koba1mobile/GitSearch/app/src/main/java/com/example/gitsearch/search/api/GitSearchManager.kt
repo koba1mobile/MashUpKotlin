@@ -9,15 +9,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 class GitSearchManager {
 
     fun requestGitRepositories(query: String): Call<GitSearchResponse> {
-        val retrofit: Retrofit = Retrofit.Builder()
+        return Retrofit.Builder()
             .baseUrl(ApiUrl.GitHubUrl.baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val service: GitHubService = retrofit.create(GitHubService::class.java)
-
-        return service.listRepos(query)
+            .build().run{
+                create(GitHubService::class.java).listRepos(query)
+            }
     }
-
-
 }
