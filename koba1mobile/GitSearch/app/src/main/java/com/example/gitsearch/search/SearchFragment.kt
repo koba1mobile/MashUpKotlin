@@ -11,6 +11,7 @@ import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
 import com.example.gitsearch.common.list.ItemClickListener
 import com.example.gitsearch.common.list.ItemData
+import com.example.gitsearch.common.util.Utils
 import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.search.api.GitSearchManager
 import com.example.gitsearch.data.GitRepo
@@ -54,9 +55,14 @@ class SearchFragment : Fragment(), ItemClickListener {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
 
-        val searchView: MenuItem = menu.findItem(R.id.search_view)
+        val searchItem: MenuItem = menu.findItem(R.id.search_view)
+        searchItem.expandActionView()
 
-        (searchView.actionView as SearchView).setOnQueryTextListener(searchTextListener)
+        val searchView: SearchView = searchItem.actionView as SearchView
+        searchView.setOnQueryTextListener(searchTextListener)
+        searchView.requestFocus()
+
+        Utils.showKeyboard(context, searchView)
     }
 
     val searchTextListener = object : SearchView.OnQueryTextListener{
