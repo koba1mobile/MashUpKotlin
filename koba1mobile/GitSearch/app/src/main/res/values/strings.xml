@@ -16,4 +16,5 @@
     <string name="user_info_ex_Language">Language</string>
     <string name="user_info_ex_update">Last Update</string>
     <string name="history_empty_list">검색 기록이 없습니다.</string>
+    <string name="search_no_result">검색 결과 없음</string>
 </resources>

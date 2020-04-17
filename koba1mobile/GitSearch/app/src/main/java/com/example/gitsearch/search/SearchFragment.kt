@@ -1,13 +1,17 @@
 package com.example.gitsearch.search
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.*
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gitsearch.MainActivity
 import com.example.gitsearch.R
+import com.example.gitsearch.common.DisposableManager
 import com.example.gitsearch.common.list.ItemClickListener
 import com.example.gitsearch.common.list.ItemData
 import com.example.gitsearch.common.util.Utils
@@ -15,15 +19,27 @@ import com.example.gitsearch.constant.Constants
 import com.example.gitsearch.search.api.GitSearchManager
 import com.example.gitsearch.data.GitRepo
 import com.example.gitsearch.db.DatabaseManager
-import com.example.gitsearch.search.data.GitSearchResponse
+import com.jakewharton.rxbinding2.support.v7.widget.RxSearchView
+import com.jakewharton.rxbinding2.support.v7.widget.queryTextChangeEvents
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_search.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import java.lang.IllegalStateException
 
 class SearchFragment : Fragment(), ItemClickListener {
     lateinit var searchManager: GitSearchManager
     lateinit var adapter: GitRepoAdapter
+
+    private lateinit var searchDisposables: DisposableManager
+    private lateinit var viewDisposables: DisposableManager
+
+    override fun onAttach(activity: Activity) {
+        super.onAttach(activity)
+        activity as AppCompatActivity
+        searchDisposables = DisposableManager(activity)
+        viewDisposables = DisposableManager(activity, isClearOnStop = false)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,7 +61,7 @@ class SearchFragment : Fragment(), ItemClickListener {
 
 
         searchManager = GitSearchManager()
-        adapter = GitRepoAdapter(context!!, this)
+        adapter = GitRepoAdapter(requireContext(), this)
 
         rv_git_info.apply {
             layoutManager = LinearLayoutManager(context)
@@ -61,22 +77,21 @@ class SearchFragment : Fragment(), ItemClickListener {
         }
 
         with(searchItem.actionView as SearchView){
-            setOnQueryTextListener(searchTextListener)
             requestFocus()
             Utils.showKeyboard(context, this)
+
+            viewDisposables.add(queryTextChangeEvents()
+                .filter { it.isSubmitted }
+                .map { it.queryText() }
+                .filter { it.isNotEmpty() }
+                .map { it.toString() }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{ query ->
+                    requestSearch(query)
+                })
         }
     }
 
-    val searchTextListener = object : SearchView.OnQueryTextListener{
-        override fun onQueryTextSubmit(query: String?): Boolean {
-            requestSearch(query)
-            return true
-        }
-
-        override fun onQueryTextChange(newText: String?): Boolean {
-            return false
-        }
-    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
@@ -89,24 +104,26 @@ class SearchFragment : Fragment(), ItemClickListener {
     }
 
     fun requestSearch(query: String?){
-
-        val searchCall: Call<GitSearchResponse> = searchManager.requestGitRepositories(query ?: "")
-        searchCall.enqueue(object : Callback<GitSearchResponse> {
-            override fun onFailure(call: Call<GitSearchResponse>, t: Throwable) {
-                println(t.message)
+        searchDisposables.add(searchManager.requestGitRepositories(query ?: "")
+            .flatMap {
+                if(0 == it.total_count){
+                    // 검색 결과가 없을 경우
+                    Observable.error(IllegalStateException(getString(R.string.search_no_result)))
+                } else {
+                    println("총 검색 결과 : ${it.total_count}개")
+                    Observable.just(it.items)
+                }
             }
-
-            override fun onResponse(
-                call: Call<GitSearchResponse>,
-                response: Response<GitSearchResponse>
-            ) {
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe ({ items ->
                 with(adapter){
-                    data = response.body()?.items
+                    setData(items)
                     notifyDataSetChanged()
                 }
-                println(response.body()?.total_count)
-            }
-        })
+            }) {
+                // 에러 메시지 토스트 출력
+                Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+            })
 
     }
 
@@ -118,7 +135,7 @@ class SearchFragment : Fragment(), ItemClickListener {
 
         findNavController().navigate(R.id.action_SearchFragment_to_UserInfoFragment, bundle)
 
-        DatabaseManager().getGitRepoDao(context!!).apply {
+        DatabaseManager().getGitRepoDao(requireContext()).apply {
             insertRepos(data)
         }
     }

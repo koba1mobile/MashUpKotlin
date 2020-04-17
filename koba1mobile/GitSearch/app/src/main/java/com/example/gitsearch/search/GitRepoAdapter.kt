@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.holder_git_repo.view.*
 
 class GitRepoAdapter(var context: Context, var itemClickListener: ItemClickListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var data: List<GitRepo>?
+    internal var data: MutableList<GitRepo>? = null
 
     init {
         data = ArrayList()
@@ -31,6 +31,10 @@ class GitRepoAdapter(var context: Context, var itemClickListener: ItemClickListe
         (holder as GitRepoViewHolder).bind(data!![position])
     }
 
+    fun setData(list: List<GitRepo>){
+        data?.clear()
+        data?.addAll(list)
+    }
 
     inner class GitRepoViewHolder(itemView: View, val listener: ItemClickListener) : RecyclerView.ViewHolder(itemView) {
         var context: Context

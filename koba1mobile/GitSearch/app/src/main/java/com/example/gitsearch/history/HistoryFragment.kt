@@ -55,7 +55,7 @@ class HistoryFragment : Fragment(), ItemClickListener{
         adapter = GitRepoAdapter(context!!, this)
         with(adapter){
             rv_git_repo_history.adapter = this@HistoryFragment.adapter
-            data = list
+            setData(list)
             notifyDataSetChanged()
         }
 
